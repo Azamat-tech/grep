@@ -24,12 +24,14 @@ kmpSearch pattern text
     | pattern /= (take (length pattern) text) = (kmpSearch pattern (tail text))
 
 search :: [String] -> EnumeratedLine -> IO ()
-search [] (numberLine, line) = return ()
-search (word : otherWords) (numberLine, line)= do
+search [] _ = return ()
+search (word : otherWords) (numberLine, line) = do
     let strings = lines line 
     let result = filter(\x -> kmpSearch word x) strings 
     if length result == 0 then search otherWords (numberLine, line) 
-        else putStrLn ("Line " ++ show numberLine ++ "(" ++ word ++ ")" ++ ": " ++ line)
+        else do 
+            putStrLn ("Line " ++ show numberLine ++ "(" ++ word ++ ")" ++ ": " ++ line)
+            search otherWords (numberLine, line)
 
 checkLines :: [String] -> Table -> IO ()
 checkLines _ [] = return ()

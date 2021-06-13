@@ -1,7 +1,7 @@
 import System.Environment (getArgs)
 import Data.List
 import Data.Maybe
-import KMP
+import KMP1
 
 type EnumeratedLine = (Int, String)
 type Table = [EnumeratedLine]

@@ -10,7 +10,7 @@ The source for implementation of KMP ->
     https://twanvl.nl/blog/haskell/Knuth-Morris-Pratt-in-Haskell
 -}
 
-module KMP where
+module KMP1 where
 
 data KMP a = KMP  { found :: Bool, next :: (a -> KMP a) }
 

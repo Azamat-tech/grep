@@ -1,6 +1,7 @@
 import System.Environment (getArgs)
 import Data.List
 import Data.Maybe
+import KMP
 
 type EnumeratedLine = (Int, String)
 type Table = [EnumeratedLine]
@@ -15,23 +16,18 @@ splitWords = foldr (\c (x:xs) -> if c == '|' then []:x:xs else (c:x):xs) [[]]
 display :: Table -> IO ()
 display = mapM_ (\(a,b) -> putStrLn ("Line " ++ show a ++ ": " ++ b))
 
--- NOT KMP ALG. This version just looks over the prefixes. More like using isPrefixOf function
--- to get the result. This version will be updated 
-kmpSearch :: String -> String -> Bool
-kmpSearch pattern text 
-    | length pattern > length text = False
-    | pattern == (take (length pattern) text) = True
-    | pattern /= (take (length pattern) text) = (kmpSearch pattern (tail text))
+printLine :: EnumeratedLine -> String -> IO () 
+printLine (number, line) word = 
+    putStrLn ("(line "++show number++") "++ "'"++word++"'"++": "++ line)
 
 search :: [String] -> EnumeratedLine -> IO ()
 search [] _ = return ()
-search (word : otherWords) (numberLine, line) = do
-    let strings = lines line 
-    let result = filter(\x -> kmpSearch word x) strings 
-    if length result == 0 then search otherWords (numberLine, line) 
-        else do 
-            putStrLn ("Line " ++ show numberLine ++ "(" ++ word ++ ")" ++ ": " ++ line)
-            search otherWords (numberLine, line)
+search (word : otherWords) numberedLine@(numberLine, line) = do
+    if isSubstringOf word line then do 
+            printLine numberedLine word
+            search otherWords numberedLine
+        else 
+            search otherWords numberedLine
 
 checkLines :: [String] -> Table -> IO ()
 checkLines _ [] = return ()
@@ -42,14 +38,9 @@ checkLines words (line : numberedList) = do
 preSearch :: [String] -> String -> IO ()
 preSearch words content = do
     let stplitLines = lines content
-    let enumaratedList = [(a, b) | (a, b) <- zip [1..] stplitLines]
+        enumaratedList = [ (a, b) | (a, b) <- zip [1..] stplitLines ]
     checkLines words enumaratedList
-        
-    -- display enumaratedList
-    -- putStrLn "###"
-    -- let result = kmpSearch x content 
-    -- putStrLn (show (length (lines content)))
-    -- mapM putStrLn words 
+
 
 chooseOption :: [String] -> Maybe String -> IO ()
 chooseOption words (Just file) = do 
@@ -64,6 +55,6 @@ main = do
     (wordsArg : fileArg) <- getArgs 
 
     let file = checkFile fileArg
-    let listOfWords = splitWords wordsArg
+        listOfWords = splitWords wordsArg
 
     chooseOption listOfWords file

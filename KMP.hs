@@ -2,57 +2,84 @@ module KMP where
 
 import Data.Array 
 
-data Table a = { prefixTable :: Array Int a }
+data Table a = Table { wordTable :: Array Int a, jumpTable :: Array Int Int }
 
-toArray :: String -> Array Int Char 
-toArray pattern = 
-    let size = length pattern
-    in listArray (0, size - 1) pattern
+toArray :: [a] -> Int -> Array Int a
+toArray pattern size = listArray (0, size - 1) pattern
 
-{-
-COMPUTE- PREFIX- FUNCTION (P)
-1. m ←length [P]		//'p' pattern to be matched
-2. Π [1] ← 0
-3. k ← 0
-4. for q ← 2 to m
-5.      do while k > 0 and P [k + 1] ≠ P [q]
-6.          do k ← Π [k]
-7.      If P [k + 1] = P [q]
-8.          then k← k + 1
-9.      Π [q] ← k
-10. Return Π
--}
-
-computePrefixFunction :: Eq a => [a] -> Table a 
-computePrefixFunction pattern = 
-    let size = length pattern
-        patterArr = toArray pattern 
-        tableArr = toArray (replicate size 0)
-        lenLongestPrefix = 0
-        index = 1
-        loop index size = do 
-            if index == size 
+computePrefixFunction :: Array Int a -> Int -> Array Int Int 
+computePrefixFunction wordTable size = 
+    let index         = 1
+        longestPrefix = 0
+        prefixTable = toArray (take size $ repeat 0) size
+        construct prefixTable index longestPrefix 
+            | index >= size = prefixTable
+            | otherwise = 
+                if wordTable ! index == wordTable ! longestPrefix then
+                    construct (prefixTable // [(index, longestPrefix + 1)]) (index + 1) (longestPrefix + 1)
+                    else if longestPrefix > 0 then
+                        construct prefixTable index (prefixTable ! longestPrefix)
+                    else construct (prefixTable // [(index, 0)]) (index + 1) (longestPrefix)
     
-    in loop index size 
+    in construct prefixTable index longestPrefix
 
 {-
 The function takes the text and the pattern as arguments and returns 
 the list of indices where the pattern appeared in the
 -}
-kmpMatcher :: String -> String -> [Int]
+kmpMatcher :: Eq a => [a] -> [a] -> [Int]
+kmpMatcher text pattern = 
+    let textSize    = length text
+        textArr     = toArray text textSize
+        patternSize = length pattern
+        patternArr  = toArray pattern patternSize
+        
+        -- preprocessed pattern
+        prefixList = computePrefixFunction patternArr patternSize
+
+        indexP = 0 -- index for patternArr
+        indexT = 0 -- index for text
+
+        match indexP indexT 
+            | indexT >= textSize = []
+            | otherwise = 
+                if patternArr ! indexP == textArr ! indexT then
+                    if (indexP + 1) == patternSize then 
+                        (indexT - indexP) : match (prefixList ! indexP) (index + 1)
+                    else match (indexP + 1) (indexT + 1)
+                else if indexT < textSize && patternArr ! indexP /= textArr ! indexT then
+                    if indexP /= 0 
+                        then match (prefixList ! (indexP - 1)) indexT
+                        else match indexP (indexT + 1)
+                else []
+    in match indexP indexT
+
 
 {-
-KMP-MATCHER (T, P)
-1. n ← length [T]
-2. m ← length [P]
-3. Π← COMPUTE-PREFIX-FUNCTION (P)
-4. q ← 0		// numbers of characters matched
-5. for i ← 1 to n	// scan S from left to right 
-6.      do while q > 0 and P [q + 1] ≠ T [i]
-7.          do q ← Π [q]		// next character does not match
-8.      if P [q + 1] = T [i]
-9.          then q ← q + 1		// next character matches
-10.     If q = m			           // is all of p matched?
-11.         then print "Pattern occurs with shift" i - m
-12.         q ← Π [q]				// look for the next match
+https://www.geeksforgeeks.org/kmp-algorithm-for-pattern-searching/ - GeeksForGeeks
+
+def KMPSearch(pat, txt):
+    M = len(pat)
+    N = len(txt)
+
+    lps = [0]*M
+    j = 0 # index for pat[]
+
+    computeLPSArray(pat, M, lps)
+  
+    i = 0 # index for txt[]
+    while i < N:
+        if pat[j] == txt[i]:
+            i += 1
+            j += 1
+  
+        if j == M:
+            print ("Found pattern at index " + str(i-j))
+            j = lps[j-1]
+
+        elif i < N and pat[j] != txt[i]:
+            if j != 0:
+                j = lps[j-1]
+            else:
+                i += 1
 -}

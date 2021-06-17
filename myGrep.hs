@@ -2,7 +2,6 @@ import Data.List
 import System.Exit
 import Data.Maybe
 import Algorithm.KMP
-import Control.Monad
 import System.Environment (getArgs)
 
 type Indices        = [Int]

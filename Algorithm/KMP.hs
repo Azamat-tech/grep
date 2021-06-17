@@ -1,27 +1,61 @@
-module KMP where
+{-
+This module implements the string searching algorithm: KMP (Knuth-Morris-Pratt).
+-}
+module Algorithm.KMP 
+    (
+        kmpMatcher,
+        computePrefixFunction,
+        IndexElement,
+        IntArray,
+        Table
+    )   
+where
 
 import Data.Array 
+    (
+        Array,
+        listArray,
+        (!),
+        (//)
+    )
 
+type IntArray     = Array Int Int
 type IndexElement = (Int, Int)
-type IntArray = Array Int Int
 
-data Table a = Table { wordTable :: Array Int a, prefixTable :: IntArray } deriving (Show)
+data Table a = Table 
+    { 
+        wordTable :: Array Int a, 
+        prefixTable :: IntArray 
+    } 
+    deriving (Show)
 
+-- converts the list to an array 
 toArray :: [a] -> Int -> Array Int a
 toArray pattern size = listArray (0, size - 1) pattern
 
+-- function that changes the elements of the array 
+-- takes an array, index and the element. Returns a new array.
 changeElement :: IntArray -> IndexElement -> IntArray
 changeElement prevArray (index, element) = prevArray // [(index, element)]
 
+{-
+This function gets the pattern (list of some Eq) and creates the KMP table i.e
+it creates the auxiliary function π, which we precompute from the pattern in 
+time Θ(m) and store in an array π[1..m]. It will allow to compute the transition 
+in O(1).
+-}
 computePrefixFunction :: Eq a => [a] -> Int -> Table a
 computePrefixFunction pattern size = 
     let index         = 1
         longestPrefix = 0
+
         table = Table 
             { 
-                wordTable = toArray pattern size, 
+                wordTable   = toArray pattern size, 
                 prefixTable = construct (toArray (take size $ repeat 0) size) index longestPrefix
             }
+
+        construct :: IntArray -> Int -> Int -> IntArray    
         construct prefixTable index longestPrefix 
             | index >= size = prefixTable
             | otherwise = 
@@ -29,11 +63,12 @@ computePrefixFunction pattern size =
                     construct (changeElement prefixTable (index, longestPrefix + 1)) (index + 1) (longestPrefix + 1)
                     else if longestPrefix > 0 then
                         construct prefixTable index (prefixTable ! longestPrefix)
-                    else construct (changeElement prefixTable (index, 0)) (index + 1) (longestPrefix)
+                else construct (changeElement prefixTable (index, 0)) (index + 1) (longestPrefix)
     in table
+
 {-
 The function takes the text and the pattern as arguments and returns 
-the list of indices where the pattern appeared in the
+the list of indices where the pattern appeared in the text. 
 -}
 kmpMatcher :: Eq a => [a] -> [a] -> [Int]
 kmpMatcher text pattern = 

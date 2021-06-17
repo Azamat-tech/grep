@@ -29,20 +29,24 @@ data Table a = Table
     } 
     deriving (Show)
 
--- converts the list to an array 
+{-
+    converts the list to an array 
+-}
 toArray :: [a] -> Int -> Array Int a
 toArray pattern size = listArray (0, size - 1) pattern
 
--- function that changes the elements of the array 
--- takes an array, index and the element. Returns a new array.
+{-
+    function that changes the elements of the array 
+    takes an array, index and the element. Returns a new array.
+-} 
 changeElement :: IntArray -> IndexElement -> IntArray
 changeElement prevArray (index, element) = prevArray // [(index, element)]
 
 {-
-This function gets the pattern (list of some Eq) and creates the KMP table i.e
-it creates the auxiliary function π, which we precompute from the pattern in 
-time Θ(m) and store in an array π[1..m]. It will allow to compute the transition 
-in O(1).
+    This function gets the pattern (list of some Eq) and creates the KMP table i.e
+    it creates the auxiliary function π, which we precompute from the pattern in 
+    time Θ(m) and store in an array π[1..m]. It will allow to compute the transition 
+    in O(1).
 -}
 computePrefixFunction :: Eq a => [a] -> Int -> Table a
 computePrefixFunction pattern size = 
@@ -67,8 +71,8 @@ computePrefixFunction pattern size =
     in table
 
 {-
-The function takes the text and the pattern as arguments and returns 
-the list of indices where the pattern appeared in the text. 
+    The function takes the text and the pattern as arguments and returns 
+    the list of indices where the pattern appeared in the text. 
 -}
 kmpMatcher :: Eq a => [a] -> [a] -> [Int]
 kmpMatcher text pattern = 

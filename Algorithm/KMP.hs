@@ -14,6 +14,7 @@ where
 import Data.Array 
     (
         Array,
+        elems,
         listArray,
         (!),
         (//)
@@ -48,6 +49,12 @@ changeElement prevArray (index, element) = prevArray // [(index, element)]
     time Θ(m) and store in an array π[1..m]. It will allow to compute the transition 
     in O(1).
 -}
+
+fibs :: Integer -> [Integer]
+fibs n = 
+    let arr = listArray (1, n) (1 : 1 : [arr ! (i - 2)  + arr ! (i - 1) | i <- [3..n]])
+    in elems arr
+
 computePrefixFunction :: Eq a => [a] -> Int -> Table a
 computePrefixFunction pattern size = 
     let index         = 1

@@ -49,12 +49,6 @@ changeElement prevArray (index, element) = prevArray // [(index, element)]
     time Θ(m) and store in an array π[1..m]. It will allow to compute the transition 
     in O(1).
 -}
-
-fibs :: Integer -> [Integer]
-fibs n = 
-    let arr = listArray (1, n) (1 : 1 : [arr ! (i - 2)  + arr ! (i - 1) | i <- [3..n]])
-    in elems arr
-
 computePrefixFunction :: Eq a => [a] -> Int -> Table a
 computePrefixFunction pattern size = 
     let index         = 1
@@ -63,20 +57,20 @@ computePrefixFunction pattern size =
         table = Table 
             { 
                 wordTable   = toArray pattern size, 
-                prefixTable = construct (toArray (take size $ repeat 0) size) index longestPrefix
+                prefixTable = listArray (0, size - 1) (0 : constructList index longestPrefix) 
             }
 
-        construct :: IntArray -> Int -> Int -> IntArray    
-        construct prefixTable index longestPrefix 
-            | index >= size = prefixTable
+        constructList :: Int -> Int -> [Int]    
+        constructList index longestPrefix 
+            | index >= size = []
             | otherwise = 
                 if (wordTable table) ! index == (wordTable table) ! longestPrefix then
-                    construct (changeElement prefixTable (index, longestPrefix + 1)) (index + 1) (longestPrefix + 1)
+                    (longestPrefix + 1) : constructList (index + 1) (longestPrefix + 1)
                     else if longestPrefix > 0 then
-                        construct prefixTable index (prefixTable ! longestPrefix)
-                else construct (changeElement prefixTable (index, 0)) (index + 1) (longestPrefix)
+                        constructList index ((prefixTable table) ! longestPrefix)
+                else  0 : constructList (index + 1) longestPrefix
     in table
-
+    
 {-
     The function takes the text and the pattern as arguments and returns 
     the list of indices where the pattern appeared in the text. 

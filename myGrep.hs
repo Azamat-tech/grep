@@ -79,10 +79,10 @@ splitWords = foldr (\c (x:xs) -> if c == '|' then []:x:xs else (c:x):xs) [[]]
 chooseOption :: [String] -> Maybe String -> IO ()   
 chooseOption words (Just file) = do 
     content <- readFile file 
-    putStrLn $ preSearch words content
+    putStr $ preSearch words content
 chooseOption words Nothing = do
     content <- getContents
-    putStrLn $ preSearch words content
+    putStr $ preSearch words content
 
 {-
     This method prepares for the search by enumerating the content from the standard
@@ -110,10 +110,10 @@ matchLines words = concatMap (search words)
 search :: [String] -> EnumeratedLine -> String
 search words numberedLine@(numberLine, line) = 
     let check :: String -> String
-        check word 
-            | nonEmpty result = printLine numberedLine word result
-            | otherwise = ""
-                where result = kmpMatcher line word
+        check word = printLine numberedLine word result
+            -- | nonEmpty result = printLine numberedLine word result
+            -- | otherwise = ""
+            where result = kmpMatcher line word
     in concatMap (check) words
 
 {-
@@ -134,4 +134,4 @@ printLine (number, line) word =
             ++ "at index " ++ show x ++ " '" 
             ++ word ++ "'" ++ ": " ++ line 
             ++ "\n"
-    in init . concatMap (prepareLine)
+    in concatMap (prepareLine)

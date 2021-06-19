@@ -111,16 +111,8 @@ search :: [String] -> EnumeratedLine -> String
 search words numberedLine@(numberLine, line) = 
     let check :: String -> String
         check word = printLine numberedLine word result
-            -- | nonEmpty result = printLine numberedLine word result
-            -- | otherwise = ""
             where result = kmpMatcher line word
     in concatMap (check) words
-
-{-
-    Checks if the list of indicies is empty or not.
--}
-nonEmpty :: Indices -> Bool 
-nonEmpty = not . null 
 
 {-
     Prints the output of the search : the number of the line, the index position, 

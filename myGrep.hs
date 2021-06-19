@@ -77,12 +77,9 @@ splitWords = foldr (\c (x:xs) -> if c == '|' then []:x:xs else (c:x):xs) [[]]
     the function will read from the standard input and proceed.
 -}
 chooseOption :: [String] -> Maybe String -> IO ()   
-chooseOption words (Just file) = do 
-    content <- readFile file 
-    putStr $ preSearch words content
-chooseOption words Nothing = do
-    content <- getContents
-    putStr $ preSearch words content
+chooseOption words maybeFile = do 
+    content <- maybe getContents readFile maybeFile 
+    putStr $ preSearch words content 
 
 {-
     This method prepares for the search by enumerating the content from the standard

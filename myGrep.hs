@@ -1,6 +1,7 @@
 import Data.List
 import System.Exit
 import Data.Maybe
+import Data.Char
 import Algorithm.KMP
 import System.Environment (getArgs)
 
@@ -21,24 +22,20 @@ parse ["--version"] = version >> exit
 parse []            = exitArgumentMissing 
 parse (word:file)   = start word file
 
-exit :: IO a
-exit = exitWith ExitSuccess
-
 {-
     Returns the error message to the console
 -}
 exitWithErrorMessage :: String -> ExitCode -> IO a
 exitWithErrorMessage str e = putStrLn str >> exitWith e
 
-{-
-    prepares the error messages and passes to the exitWithErrorMessage
--}
 exitArgumentMissing :: IO a
 exitArgumentMissing = 
     let argumentMissing = "Pattern is not provided. Please provide at least one word\n"
         info = "For additional information run : $ runghc myGrep --help"
     in exitWithErrorMessage (argumentMissing ++ info) (ExitFailure 2)
 
+exit :: IO a
+exit = exitWith ExitSuccess
 
 {-
     Returns the version of the program
@@ -49,11 +46,13 @@ version = putStrLn "myGrep 1.0"
 {-
     Returns the information on how to use the program. 
 -}
+userMessage :: String
+userMessage = 
+    "usage example with text file: $ runghc myGrep.hs 'apple|orange' \"text.txt\"\n\
+    \usage example from standard input: $ runghc myGrep.hs 'apple|orange' "
+
 usage :: IO ()
-usage = 
-    let userMsgFile = "usage example with text file: $ runghc myGrep.hs 'apple|orange' \"text.txt\" "
-        userMsgTerminal = "usage example from standard input: $ runghc myGrep.hs 'apple|orange' "
-    in putStrLn (userMsgFile ++ "\n" ++ userMsgTerminal)
+usage = putStrLn userMessage
 
 {-
     Gets the word and file argumetns after parsing and starts the searching process.
@@ -111,6 +110,9 @@ search words numberedLine@(numberLine, line) =
             where result = kmpMatcher line word
     in concatMap (check) words
 
+trim :: String -> String
+trim = unwords . words
+
 {-
     Prints the output of the search : the number of the line, the index position, 
     which word and the line itself.
@@ -121,6 +123,6 @@ printLine (number, line) word =
         prepareLine x = 
             "(line " ++ show number ++ ") " 
             ++ "at index " ++ show x ++ " '" 
-            ++ word ++ "'" ++ ": " ++ line 
+            ++ word ++ "'" ++ ": " ++ trim line 
             ++ "\n"
     in concatMap (prepareLine)

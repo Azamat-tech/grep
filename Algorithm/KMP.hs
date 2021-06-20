@@ -51,7 +51,7 @@ changeElement prevArray (index, element) = prevArray // [(index, element)]
 -}
 computePrefixFunction :: Eq a => [a] -> Int -> Table a
 computePrefixFunction pattern size = 
-    let index         = 1
+    let index         = 0
         longestPrefix = 0
 
         table = Table 
@@ -86,7 +86,7 @@ kmpMatcher text pattern =
         table = computePrefixFunction pattern patternSize
 
         indexP = 0 -- index for patternArr
-        indexT = 0 -- index for text
+        indexT = 0 -- index for text 
 
         match :: Int -> Int -> [Int]
         match indexP indexT 

@@ -111,7 +111,9 @@ search words numberedLine@(numberLine, line) =
     in concatMap (check) words
 
 trim :: String -> String
-trim = unwords . words
+trim = 
+    let helper = reverse . dropWhile isSpace
+    in helper . helper 
 
 {-
     Prints the output of the search : the number of the line, the index position, 

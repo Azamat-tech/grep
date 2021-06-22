@@ -94,7 +94,7 @@ kmpMatcher text pattern =
             | otherwise = 
                 if patternArr ! indexP == textArr ! indexT then
                     if (indexP + 1) == patternSize then 
-                        (indexT - indexP) : match ((prefixTable table) ! indexP) (indexT + 1)
+                        (indexT - indexP + 1) : match ((prefixTable table) ! indexP) (indexT + 1)
                     else match (indexP + 1) (indexT + 1)
                 else if indexT < textSize && patternArr ! indexP /= textArr ! indexT then
                     if indexP /= 0 
